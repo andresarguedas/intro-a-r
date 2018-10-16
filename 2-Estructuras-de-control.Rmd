@@ -1,0 +1,69 @@
+---
+title: "Programación Estadística con R"
+subtitle: <h1>Estructuras de control</h1>
+author: "Andrés E. Arguedas L."
+date: ""
+output: 
+  revealjs::revealjs_presentation:
+    theme: beige
+    highlight: pygments
+    transition: slide
+    center: true
+---
+
+# Estructuras de control en R
+
+## Estructuras de control
+
+Las estructuras de control en R permiten controlar el flujo de ejecución de un programa, dependiendo de una serie de condiciones. Las más comunes son:
+
+- `if`, `else`: Prueba una condición lógica
+- `for`: Ejecuta algo una cierta cantidad (finita) de veces
+- `while`: Ejecuta algo mientras se cumpla una condición lógica
+- `repeat`: Ejecuta un ciclo infinito
+- `return`: Devuelve el resultado de una función
+
+##
+
+Veamos estas estructuras de control de forma más profunda
+
+## `if`
+
+Estructura básica del `if`:
+
+```{r, eval=F, echo=T}
+# Una sola condición
+if(<condición>) {
+  ## Haga algo si la condición se cumple
+}else {
+  ## Haga otra cosa si la condición NO se cumple
+}
+
+# Dos condiciones
+if(<condición1>) {
+  ## Haga algo si se cumple condición 1
+} else if(<condición2>) {
+  ## Haga algo distinto si se cumple la condición 2, pero no la 1
+} else {
+  ## Haga otra cosa si no se cumple ninguna de las condiciones
+}
+```
+
+## `if`
+
+```{r}
+x <- 2
+if (x > 3) {
+  y <- 10
+} else {
+  y <- 0
+}
+y
+```
+
+## `if`
+
+```{r}
+
+```
+
