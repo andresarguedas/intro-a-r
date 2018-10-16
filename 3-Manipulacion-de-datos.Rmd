@@ -1,0 +1,508 @@
+---
+title: "Programación Estadística con R"
+subtitle: <h1>Manipulación de datos</h1>
+author: "Andrés E. Arguedas L."
+date: ""
+output: 
+  revealjs::revealjs_presentation:
+    theme: simple
+    highlight: pygments
+    transition: slide
+    center: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 5, fig.height = 4, message = FALSE, warning = FALSE)
+```
+
+# Indexación
+
+## Indexación de conjuntos de datos
+
+Existen muchos operadores usados para lograr extraer subobjetos de objetos en R. Los principales son:
+
+- `[]` extrae un objeto, de la misma clase que el original, y puede ser usado para seleccionar más de un objeto
+- `[[]]` extrae elementos de una lista o un dataframe. Solo puede usarse para seleccionar un elemento simple y al clase del objeto resultante no necesariamente es una lista o un marco de datos
+- `$` se usa para extraer elementos de una lista o un marco de datos por su nombre; su uso es similar al de `[[]]`
+
+## Indexación en vectores
+
+Veamos ejemplos:
+
+```{r}
+x <- c("a", "b", "c", "c", "d", "a")
+x
+
+x[1]
+
+x[2]
+```
+
+## Indexación en vectores
+
+```{r}
+x[1:4]
+
+x[x > "a"]
+
+u <- x > "a"
+u
+
+x[u]
+```
+
+## Indexación en listas
+
+Veamos ahora la indexación de una lista:
+
+```{r}
+x <- list(A = 1:4, B = 0.6)
+x
+
+x[1]
+```
+
+## Indexación en listas
+
+```{r}
+x[[1]]
+
+x$B
+```
+
+## Indexación en listas
+
+```{r}
+x[["B"]]
+
+x <- list(A = 1:4, B = 0.6, C = "texto")
+x
+```
+
+## Indexación en listas
+
+```{r}
+x[c(1, 3)]
+```
+
+## Indexación en listas
+
+El operador `[[]]` se usa como indexador, mientras que `$` solo puede usarse de una forma más literal. Veamos como funcionan:
+
+```{r}
+x <- list(A = 1:4, B = 0.6, C = "texto")
+x
+
+m <- "A"
+x[[m]]
+```
+
+## Indexación en listas
+
+```{r}
+x$m
+
+x$A
+```
+
+## Indexación en listas
+
+Además, el operador `[[]]` puede tomar secuencias de números enteros.
+
+```{r}
+x <- list(a = list(10, 12, 14), b = c(3.14, 2.81))
+x
+```
+
+## Indexación en listas
+
+```{r}
+x[[c(1, 3)]]
+
+x[[1]][[3]]
+
+x[[c(2, 1)]]
+```
+
+## Indexación en matrices
+
+Veamos como funciona la indexación en matrices.
+
+```{r}
+x <- matrix(1:6, 2, 3)
+x
+
+x[1, 2]
+
+x[2, 1]
+```
+
+## Lidiando con valores perdidos
+
+Una de las principales razones por las cuales necesitamos trabajar con ciertos subconjuntos es para eliminar valores perdidos (o `NA`'s) de un conjunto de datos. Esto lo podemos hacer con la función `is.na` y el operador `!`, que significa distinto.
+
+```{r}
+x <- c(1, 2, NA, 4, NA, 5)
+
+mal <- is.na(x)
+mal
+
+x[!mal]
+```
+
+## Lidiando con valores perdidos
+
+Si hay varios objetos y se quiere tomar solamente aquellos que estén completos (es decir, que no tengan valores perdidos), se puede hacer algo como lo siguiente:
+
+```{r}
+x <- c(1, 2, NA, 4, NA, 5)
+y <- c("a", "b", NA, "d", NA, "f")
+bien <- complete.cases(x, y)
+bien
+
+x[bien]; y[bien]
+```
+
+# El paquete `tidyverse`
+
+##
+
+Es un paquete que recopila varios paquetes útiles para análisis de datos en uno solo. Estos son, entre otros:
+
+- `dplyr` (para manipular conjuntos de datos)
+- `tidyr` (para limpiar conjuntos de datos)
+- `data.table` (para trabajar con datos grandes)
+- `ggplot2` (útil para hacer gráficos)
+- `stringr` (para manipulación de texto)
+
+# El paquete `dplyr`
+
+## Funciones especiales de `dplyr`
+
+El paquete `dplyr` ofrece cinco "verbos" que cubren los aspectos fundamentales de las tareas de manipulación de datos. Estos son:
+
+- `select()`
+- `filter()`
+- `arrange()`
+- `mutate()`
+- `summarise()`
+
+## Ejemplo
+
+```{r}
+library(dplyr)
+cran<-read.csv("2017-04-29.csv", 
+               stringsAsFactors = FALSE)
+str(cran)
+```
+
+## Función `select()`
+
+```{r, eval=F, echo=T}
+select(cran, ip_id, size, package, country)
+select(cran, package:country)
+select(cran, country:package) #orden inverso
+select(cran, -time)
+select(cran,-(date:size))
+```
+
+## Función `filter()`
+
+```{r, eval=F, echo=T}
+filter(cran, package == "car")
+filter(cran, r_version =="3.3.3", country == "CR")
+filter(cran, r_version <="3.0.2", country == "CR")
+
+#Filtrar filas si su país es México o Costa Rica.
+filter(cran, country== "MX" | country == "CR") 
+filter(cran, size>100500, country == "CR")
+filter(cran, !is.na(r_version))
+```
+
+## Función `arrange()`
+
+```{r, eval=F, echo=T}
+cran2<-select(cran, size:ip_id)
+arrange(cran2,ip_id) # Ascendentemente
+arrange(cran2,desc(ip_id)) # Descendentemente
+arrange(cran2, package, ip_id)
+arrange(cran2, country, desc(r_version), ip_id)
+```
+
+## Función `mutate()`
+
+```{r, eval=F, echo=T}
+cran3<-select(cran, ip_id, package, size)
+mutate(cran3, mb = size / 2^20)
+mutate(cran3, mb = size / 2^20, gb = mb / 2^10)
+mutate(cran3, peso = size + 1000)
+```
+
+## Función `summarise()`
+
+```{r, eval=F, echo=T}
+summarise(cran, avg_bytes = mean(size))
+```
+
+## Agrupar y encadenar datos con `dplyr`
+
+```{r, eval=F, echo=T}
+por_paquete<-group_by(cran,package) # ¿Que pasa si se corre solo ésta línea?
+summarise(por_paquete, mean(size))
+```
+
+## Práctica
+
+Cree, a partir de los datos originales, un nuevo conjunto de datos que contenga las siguientes variables:
+
+- `conteo`: Total de filas (es decir descargas) por paquete
+- `unicos`: Total de descargas únicas del paquete
+- `paises`: Total de paises donde cada paquete fue descargado
+- `promedio_bytes`: Media de descarga para cada paquete
+
+## Solución
+
+```{r, eval=F, echo=T}
+resumen_pack<-summarise(por_paquete,
+                        # Contiene el total de filas (i.e. descargas) por paquete
+                        conteo=n(), 
+                        # Tiene el total de descargas únicas por paquete
+                        unicos=n_distinct(ip_id),
+                        # Tiene el total de países donde cada paquete fue descargado
+                        paises=n_distinct(country),
+                        # Contiene la media de descarga para cada paquete
+                        promedio_bytes=mean(size)) 
+resumen_pack
+```
+
+## Práctica
+
+Del conjunto de datos generado mediante el ejercicio anterior, obtenga los paquetes que están dentro del "top 1%" y mantenga los paquetes con más descargas en la parte superior.
+
+## Solución
+
+```{r, eval=F, echo=T}
+quantile(resumen_pack$unicos, probs = 0.99)
+top_unicos_ordenado <- arrange(top_unicos, desc(unicos))
+```
+
+## Operador `%>%`
+
+Encadenar comandos y objetos nos permite juntar varias llamadas de una función de una manera compacta y legible, llegando al mismo resultado.
+
+```{r, echo=T, eval=F}
+resultado2<-arrange(filter(summarise(group_by(cran,
+                                              package),
+                                     conteo=n(),
+                                     unicos=n_distinct(ip_id),
+                                     paises=n_distinct(country),
+                                     promedio_bytes=mean(size)),
+                           paises>60),
+                    desc(paises),
+                    promedio_bytes)
+```
+
+## Operador `%>%`
+
+```{r, eval=F, echo=T}
+resultado3<-cran%>%
+  group_by(package) %>%
+  summarise(conteo=n(),
+            unicos=n_distinct(ip_id),
+            paises=n_distinct(country),
+            promedio_bytes=mean(size))%>%
+  filter(paises>60)%>%
+  arrange(desc(paises), promedio_bytes)
+```
+
+# El paquete `tidyr`
+
+## Ordenar datos con el paquete `tidyr`
+
+Los datos ordenados (*tidy data*) hace referencia a la forma estándar que debe tener todo conjunto de datos para facilitar la exploración y análisis de los datos, así como para trabajar de forma simple con otras herramientras para datos ordenados. En concreto, el artículo de Hadley Wickham dice que un conjunto de datos ordenados satisface tres condiciones:
+
+1. Cada variable forma una columna
+2. Cada observación forma una fila
+3. Cada tipo de unidad observada forma una tabulación
+
+## Ordenar datos con el paquete `tidyr`
+
+Cualquier conjunto de datos que no satisfaga estas tres condiciones es considerada como datos desordenados (*messy data*).
+
+Dos de la funciones más importantes del paquete `tidyr` son `gather()` y `spread()`
+
+## Conjunto de datos
+
+Para esta parte, vamos a usar los datos del archivo `gasto.csv`, que corresponde a una consulta a algunos estudiantes donde se les preguntaba su sexo, y, para cada una de 5 actividades distintas, si gastaban o no dinero en ellas.
+
+```{r}
+library(tidyr)
+
+base <- read.csv("gasto.csv")
+head(base)
+```
+
+## Función `gather()`
+
+La función `gather()` permite agrupar varias columnas en una sola. Por ejemplo, supongamos que queremos dos columnas, una que indique el tipo de actividad (Netflix, Cine, Salidas, etc.) y otra que indique si el estudiante gastó o no dinero en esa actividad ("1" o "0")
+
+## Función `gather()`
+
+```{r}
+base %>%
+  select(sexo, Netflix:Parques) %>%
+  gather(actividad, gastan, -c(sexo)) %>% 
+  head()
+```
+
+¿Por qué 500 filas?
+
+## Función `spread()`
+
+```{r}
+base %>%
+  select(sexo, Netflix:Parques) %>%
+  gather(actividad, gastan, -c(sexo)) %>%
+  group_by(actividad, sexo) %>%
+  summarise(gastan=sum(gastan)) %>% 
+  data.frame() %>% 
+  head()
+```
+
+Es posible propagar los valores de una columna en varias. Por ejemplo, se puede usar la función `spread()` para crear las columas Masculina y Femenino a partir de sexo.
+
+## Función `spread()`
+
+```{r}
+base %>%
+  select(sexo, Netflix:Parques) %>%
+  gather(actividad, gastan, -c(sexo) )%>%
+  group_by(actividad, sexo) %>%
+  summarise(gastan=sum(gastan)) %>%
+  spread(sexo, gastan) %>% 
+  data.frame() %>% 
+  head()
+```
+
+
+# Manipulación de fechas: El paquete `lubridate`
+
+## El paquete `lubridate`
+
+La función `today()` muestra la fecha actual.
+
+```{r}
+library(lubridate)
+hoy <- today()
+hoy
+```
+
+## El paquete `lubridate`
+
+Hay tres componentes en la fecha:
+
+```{r}
+year(hoy)    # El año
+
+wday(hoy)    # El día de la semana, numéricamente
+
+wday(hoy, label = T)    # El día de la semana con etiqueta
+```
+
+## El paquete `lubridate`
+
+`lubridate` es muy útil para trabajar combinaciones de fecha y tiempo. De igual forma pueden extraerse sus componentes.
+
+```{r}
+justo_ahora <- now()
+justo_ahora
+
+minute(justo_ahora)
+```
+
+## El paquete `lubridate`
+
+`lubridate` ofrece una gran variedad de funciones para trabajar con fechas y tiempos:
+
+```{r}
+fecha1 <- ymd("1989-05-16")
+fecha1
+```
+
+No parece que el resultado haya cambiado, excepto por la zona horaria, pero hay un cambio muy importante a lo interno de R y es que `lubridate` creó un objeto de forma `Date`
+
+```{r}
+class(fecha1)
+```
+
+## El paquete `lubridate`
+
+La función `ymd()` recibe como argumento principal una cadena de caracteres y regresa un objeto de clase `POSIXct`. No es necesario entender qué significa esto por el momento, solo hace falta saber que es una forma en que R almacena este tipo de información. Por ejemplo, "1989-05-16" es un formato bastante estándar, pero lubridate es suficientemente "inteligente" para entender los diferentes formatos de fecha y hora:
+
+```{r}
+ymd("1989 Mayo 16")
+```
+
+## El paquete `lubridate`
+
+La manipulación de fechas y horarios también aplica a distintas zonas horarias. Suponga que alguien en Nueva York planea visitar a un amigo en Hong Kong. Suponga además que no se tiene acceso momentáneamente al itinerario, pero se sabe que el vuelo de Nueva York es a las 17:34 de pasado mañana; también se sabe que el vuelo está programado para llegar en Hong Kong exactamente 15 horas y 50 minutos después de la salida.
+
+## El paquete `lubridate`
+
+Es posible reconstruir el itinerario con la información que se recuerda, comenzando con la fecha completa y la hora de salida. La idea es obtener una aproximación buscando la fecha de Nueva York, añadadiendo dos días y fijando la hora a las 17:34. Para encontrar la hora en Nueva York se puede usar el siguiente comando (ver `?now` para más información).
+
+```{r}
+nyc <- now("America/New_York")
+nyc
+```
+
+## El paquete `lubridate`
+
+Para ver una lista completa de zonas horarias se puede visitar [http://en.wikipedia.org/wiki/List_of_tz_database_time_zones](http://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Si el vuelo es pasado mañana (en hora de Nueva York), se busca añadir dos días a Nueva York. Un aspecto positivo de `lubridate` es que permite el uso de operadores aritméticos para las fechas y horas.
+
+```{r}
+salida <- nyc + days(2)
+salida
+```
+
+## El paquete `lubridate`
+
+También puede usarse la función `update`:
+
+```{r}
+salida <- update(salida, hours = 17, minutes = 34)
+salida
+```
+
+## El paquete `lubridate`
+
+La persona que está en Hong Kong quiere saber a qué hora lo recogerán desde el aeropuerto de esa ciudad. Ahora que se cuenta con la fecha y hora de la salida exacta de Nueva York, puede obtenerse la hora de llegada a Hong Kong.
+
+```{r}
+llegada <- salida + hours(15) + minutes(50)
+llegada
+```
+
+## El paquete `lubridate`
+
+Con la función `with_tz()` puede verse la fecha y hora que corresponde a otra zona horaria (ver `?with_tz` para más información).
+
+```{r}
+llegada <- with_tz(llegada, "Asia/Hong_Kong")
+llegada
+
+hora_final <- mdy("06-17-2008", tz = "Singapore")
+hora_final
+```
+
+
+## Práctica
+
+Cree, a partir del conjunto de datos de descargas de paquetes en CRAN, un nuevo conjunto de datos que contenga las siguientes variables:
+
+- `nombre`: nombre del paquete
+- `cantidad`: cantidad de descargas
+- `tasa`: cantidad de descargas promedio por hora
+- `pais`: pais de donde hubo mayor número de descargas
+
+**Sugerencia:** Utilizar una o más veces las funciones `select()`, `mutate()` y `separate()` facilita el trabajo.

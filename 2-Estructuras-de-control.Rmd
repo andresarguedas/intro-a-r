@@ -5,7 +5,7 @@ author: "Andrés E. Arguedas L."
 date: ""
 output: 
   revealjs::revealjs_presentation:
-    theme: beige
+    theme: serif
     highlight: pygments
     transition: slide
     center: true
@@ -64,6 +64,393 @@ y
 ## `if`
 
 ```{r}
+y <- if(x > 3) {
+  10
+} else {
+  0
+}
+y
+```
 
+¿Cual es la diferencia?
+
+## `if`
+
+Otra forma de escribir un `if` es mediante el comando `ifelse`
+
+```{r, eval=F, echo=T}
+ifelse(<condición>, <resultado si cierto>, <resultado si falso>)
+```
+
+```{r}
+ifelse(x > 3, 10, 0)
+```
+
+## `for`
+
+El `for` nos sirve para hacer un ciclo (o iterar) una cierta cantidad de veces. Veamos si los números de un vector son mayores a 3:
+
+```{r}
+x <- c(2, 7, 10, 11)
+y <- c()
+for(i in 1:4) {
+  y[i] <- ifelse(x[i] > 3, 1, 0)
+}
+
+cbind(x, y)
+```
+
+## `for`
+
+También podemos anidar una `for` en otro:
+
+```{r}
+x <- matrix(1:6, ncol = 3, nrow = 2)
+y <- matrix(0, ncol = 3, nrow = 2)
+for(i in 1:2) {
+  for(j in 1:3) {
+    y[i, j] <- x[i,j] * 2
+  }
+}
+x; y
+```
+
+## `while`
+
+Al hacer `while` repetimos algo hasta que se cumpla una condición:
+
+```{r}
+conteo <- 0
+while(conteo < 10) {
+  print(conteo)
+  conteo <- conteo + 1
+}
+```
+
+# Funciones en R
+
+## Funciones
+
+Para crear nuestras propias funciones en R, usamos la siguiente estructura:
+
+```{r, eval=F, echo=T}
+# Por lo general, es buena práctica poner nombres originales
+# y faciles de identificar para objetos y funciones
+funcion <- function(argumento1, argumento2, ...) {
+  # Aquí escribimos el código que queremos ejecutar con base en los 
+  # parámetros que describimos anteriormente
+}
+```
+
+Un ejemplo de una función:
+
+```{r}
+diferencia <- function(argumento1, argumento2) {
+  argumento1 - argumento2
+}
+diferencia(10, 5)
+```
+
+## Práctica
+
+Con base en la función `diferencia` que definimos anteriormente, use como argumentos las siguientes estructuras:
+
+- Caracter
+- Lógico
+- Vector
+- Lista
+- Matriz
+
+¿Qué ocurre en cada caso?
+
+¿Hay algún caso en específico que le parezca interesante?
+
+## Práctica
+
+- Construya una función que calcule la raíz cuadrada de la suma de dos números.
+- Cree una función que sume todos los números contenidos dentro de un vector
+- Defina una función que devuelva los primeros *n* números pares (tomando en cuenta el 0)
+
+## Solución
+
+```{r}
+# Primer pregunta
+raiz.suma <- function(a, b) {
+  sqrt(a + b)
+}
+
+raiz.suma(7, 9)
+```
+
+## Solución
+
+```{r}
+# Segunda pregunta
+suma <- function(a) {
+  n <- length(a)
+  s <- 0
+  for(i in 1:n) {
+    s <- s + a[i]
+  }
+  s
+}
+
+suma(1:5); sum(1:5) # ¿Qué hace la función sum?
+```
+
+## Solución
+
+```{r}
+n.pares <- function(n) {
+  vec <- vector(length = n + 1)
+  for(i in 1:(n + 1)){
+    vec[i] <- (i - 1) * 2
+  }
+  return(vec)
+}
+
+n.pares(8)
+
+seq(0, 16, by = 2)
+```
+
+# Familia de funciones `apply`
+
+## Funciones `apply`
+
+La familia de funciones `apply` son parte del paquete `base` de R y son de especial utilidad ya que logran ejecutar una función a lo largo de ciertas porciones de matrices, arreglos, listas y dataframes de forma repetitiva. Estas funciones permiten hacer cruces entre los datos de diversas formas, para así evitar hacerlo de forma manual.
+
+## Funciones `apply`
+
+En esta sección vamos a ver las funciones:
+
+- `lapply`
+- `sapply`
+- `apply`
+- `mapply`
+- `tapply`
+- `split`
+
+## `lapply`
+
+La función `lapply` sirve cuando tenemos una lista `x` y queremos aplicar una funcion `fun` a cada uno de los elementos de la lista. Los resultados siempre se van a devolver como una lista. Podemos especificar algunos parámetros para la función a usar en el `lapply` poniendo estos después de la función y separados mediante una coma. Veamos un ejemplo:
+
+```{r}
+x <- list(a = 1:5, b = rnorm(10))
+x
+```
+
+## `lapply`
+
+```{r}
+lapply(x, mean)
+```
+
+## `lapply`
+
+```{r}
+x <- list(a = 1:4, b = rnorm(10), c = rnorm(20, 1), d = rnorm(100, 5))
+x
+```
+
+## `lapply`
+
+```{r}
+lapply(x, mean)
+```
+
+## `lapply`
+
+```{r}
+x <- 1:4
+
+lapply(x, runif)
+```
+
+## `lapply`
+
+```{r}
+x <- 1:4
+
+lapply(x, runif, min = 0, max = 10)
+```
+
+## `lapply`
+
+```{r}
+x <- list(a = matrix(1:4, 2, 2), b = matrix(1:6, 3, 2))
+x
+```
+
+## `lapply`
+
+Las funciones que se pueden usar con cualquier comando `apply` no son solamente las que R o un paquete traen, sino que podemos usar las que hayamos creado.
+
+```{r}
+lapply(x, function(elt) elt[, 1])
+```
+
+## `sapply`
+
+Es una variante de `lapply` que devuelve un vector en lugar de una lista, pero necesita que todos los elementos de la lista tengan igual longitud.
+
+```{r}
+x <- list(a = 1:4, b = rnorm(10), c = rnorm(20, 1), d = rnorm(100, 5))
+x
+```
+
+## `sapply`
+
+```{r}
+sapply(x, mean)
+```
+
+## `apply`
+
+Se usa para evaluar funciones sobre los márgenes de un arreglo (*1* = filas ó *2* = columnas). Existen algunas funciones integradas directamente en R que usan `apply`, como: 
+
+- `rowSums`, que es equivalente a utilizar `apply(x, 1, sum)`
+- `rowMeans`, que es equivalente a `apply(x, 1, mean)`
+- `colSums`, que es equivalente a `apply(x, 2, sum)`
+- `colMeans`, que es equivalente a `apply(x, 2, mean)`
+
+## `apply`
+
+```{r}
+x <- matrix(1:6, 2, 3)
+x
+
+apply(x, 2, mean); colMeans(x)
+```
+
+## `apply`
+
+```{r}
+apply(x, 1, sum); rowSums(x)
+```
+
+## `apply`
+
+```{r}
+x <- rnorm(20, 10, 1)
+x
+
+y <- runif(20, 7, 12)
+y
+```
+
+## `apply`
+
+```{r}
+z <- cbind(x, y)
+z
+
+apply(z, 2, quantile, probs = c(0.25, 0.75))
+```
+
+## `mapply`
+
+Es una versión multivariada de las funciones anteriores. Por ejemplo, con `lapply` solo se puede aplicar la función a los elementos de la lista, pero, por ejemplo, si se tiene una función con dos argumentos y se tienen dos listas, entonces se puede usar `mapply` para que cada lista corresponda a un argumento de la función.
+
+La función que se va a aplicar debe tener un número de argumento al menos igual al número de listas que se van a usar en `mapply`. El argumento `MoreArgs` de la función sirve en el caso de que se tengan argumentos adicionales que se tienen que pasar a la función.
+
+## `mapply`
+
+```{r}
+# En vez de hacer esto
+list(rep(1, 4), rep(2, 3), rep(3, 2), rep(4, 1))
+```
+
+## `mapply`
+
+```{r}
+# Se puede hacer esto
+mapply(rep, 1:4, 4:1)
+```
+
+## `tapply`
+
+Esta función se usa para aplicar una función a ciertos subconjuntos de un vector. Normalmente se tiene un vector numérico y se querrá aplicar un resumen estadístico sobre ciertas partes de este. De este forma, se necesitará otra variable u objeto que identifique los elementos del vector numérico que pertenecen a cada grupo de interés. Puede ser útil utilizar la función `gl()` para crear subgrupos.
+
+## `tapply`
+
+```{r}
+x <- c(rnorm(10), runif(10), rnorm(10, 1))
+x
+
+f <- gl(3, 10)
+f
+```
+
+## `tapply`
+
+```{r}
+tapply(x, f, mean)
+
+tapply(x, f, range)
+```
+
+## `split`
+
+La función `split` recibe un vector u objeto `x` y una variable de tipo factor `f`, que identifica los niveles del grupo, y hace una partición del objeto `x` en el número de grupos identificados en `f`. Por ejemplo, si `f` tiene 3 niveles que identifican 3 grupos, entonces la función `split` dividirá `x` en 3 grupos. 
+
+## `split`
+
+Una vez separados estos grupos, se puede usar `lapply` o `sapply` para aplicar una función a esos grupos individuales. También puede hacerse una separación en varios niveles de forma conjunta con la función `interaction()` para generar las combinaciones. Si tuvieramos algunos niveles vacíos al hacer el procedimiento anterior, podemos usar `drop=TRUE` para eliminarlos.
+
+Veamos un ejemplo:
+
+## `split`
+
+```{r}
+x <- c(rnorm(10), runif(10), rnorm(10, 1))
+f <- gl(3, 10)
+split(x, f)
+```
+
+## `split`
+
+```{r}
+lapply(split(x, f), mean)
+```
+
+# Caso práctico
+
+##
+
+Veamos a las funciones de la famila `apply` en acción usando el conjunto de datos `airquality`, que viene integrado en R.
+
+```{r}
+# Extraemos solo las 3 variables de interés
+library(datasets)
+head(airquality[, 1:3])
+```
+
+##
+
+```{r}
+base <- airquality[, 1:3]
+s <- split(base, airquality$Month)
+s
+```
+
+##
+
+```{r}
+lapply(s, function(x) colMeans(x))
+```
+
+##
+
+```{r}
+sapply(s, function(x) colMeans(x))
+```
+
+##
+
+El resultado obtenido anteriormente tiene varios `NA`. Para esto, la función `colMeans` tiene el argumento `na.rm` el cual permite omitir los valores faltantes al hacer el cálculo.
+
+```{r}
+sapply(s, function(x) colMeans(x, na.rm = T))
 ```
 

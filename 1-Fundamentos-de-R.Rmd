@@ -5,7 +5,7 @@ author: "Andrés E. Arguedas L."
 date: ""
 output: 
   revealjs::revealjs_presentation:
-    theme: beige
+    theme: moon
     highlight: pygments
     transition: slide
     center: true
